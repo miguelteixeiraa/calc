@@ -1,6 +1,6 @@
 import { UserDTO } from '../models/user.model'
 
-export const useSignUpRequest = async (payload: Partial<UserDTO>) => {
+export const signUpRequest = async (payload: Partial<UserDTO>) => {
     const res = await fetch('/api/register', {
         method: 'POST',
         body: JSON.stringify(payload),

@@ -1,6 +1,6 @@
 import { UserDTO, UserDVO } from '../models/user.model'
 
-export const useLoginRequest = async (
+export const loginRequest = async (
     payload: Partial<UserDTO>
 ): Promise<UserDVO | undefined> => {
     const res = await fetch('/api/authenticate', {

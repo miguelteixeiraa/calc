@@ -2,8 +2,8 @@
 
 import { useEffect } from 'react'
 import { Button } from '@/components/Button'
-import { useLoginRequest } from '@/lib/hooks/useLoginRequest'
-import { useSignUpRequest } from '@/lib/hooks/useSignUpRequest'
+import { loginRequest } from '@/lib/hooks/loginRequest'
+import { signUpRequest } from '@/lib/hooks/signUpRequest'
 import { useState } from 'react'
 import styled from 'styled-components'
 import { redirect } from 'next/navigation'
@@ -24,7 +24,7 @@ export default function Login() {
     }, [userData])
 
     const handleLogin = async () => {
-        const user = await useLoginRequest(formState)
+        const user = await loginRequest(formState)
         if (!user) {
             console.log('not found')
         } else {
@@ -33,7 +33,7 @@ export default function Login() {
     }
     const handleSignUp = async () => {
         try {
-            await useSignUpRequest(formState)
+            await signUpRequest(formState)
             setSignUpStatus(true)
         } catch (e) {
             setErrorSignUp(e as string)
