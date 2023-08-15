@@ -1,4 +1,4 @@
-# Design Document: Call App
+# Design Document: Calc App
 
 ## Overview
 
