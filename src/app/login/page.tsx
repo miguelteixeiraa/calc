@@ -2,8 +2,8 @@
 
 import { useEffect } from 'react'
 import { Button } from '@/components/Button'
-import { loginRequest } from '@/lib/hooks/loginRequest'
-import { signUpRequest } from '@/lib/hooks/signUpRequest'
+import { loginRequest } from '@/lib/api/loginRequest'
+import { signUpRequest } from '@/lib/api/signUpRequest'
 import { useState } from 'react'
 import styled from 'styled-components'
 import { redirect } from 'next/navigation'
