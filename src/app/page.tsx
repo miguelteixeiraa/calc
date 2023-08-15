@@ -65,7 +65,7 @@ export default function Calc() {
                     8
                 </Button>
                 <Button
-                    onClick={() => handleCalcKeyPressed('7')}
+                    onClick={() => handleCalcKeyPressed('9')}
                     variant={'primary'}
                 >
                     9
