@@ -6,14 +6,13 @@ import { darkModeAtom, userDataAtom } from '@/lib/state/store'
 import styled, { StyleSheetManager, ThemeProvider } from 'styled-components'
 import { SunIcon, MoonIcon } from '@primer/octicons-react'
 
-import { StyledComponentsRegistry } from '@/lib/helpers/styledRegistry'
+import { StyledComponentsRegistry } from '@/lib/styledRegistry'
 import { GlobalStyle } from '@/styles/globalStyles.css'
 import { lightTheme } from '@/themes/light'
 import { darkTheme } from '@/themes/dark'
 import { Header } from '@/components/Header'
 
-import { QueryClient, QueryClientProvider } from 'react-query'
-const queryClient = new QueryClient()
+import { useAuth } from '@/lib/hooks/useAuth'
 
 export default function RootLayout({
     children,
@@ -21,7 +20,6 @@ export default function RootLayout({
     children: React.ReactNode
 }) {
     const [darkMode, setDarkMode] = useAtom(darkModeAtom)
-    const [userData, setUserData] = useAtom(userDataAtom)
 
     const themeTokens = darkMode
         ? {
@@ -34,30 +32,28 @@ export default function RootLayout({
           }
 
     return (
-        <QueryClientProvider client={queryClient}>
-            <StyledComponentsRegistry>
-                <StyleSheetManager shouldForwardProp={() => true}>
-                    <ThemeProvider theme={themeTokens.theme}>
-                        <>
-                            <GlobalStyle />
-                        </>
-                        <html lang="en">
-                            <body>
-                                <StyledLayout>
-                                    <Header
-                                        switchTheme={() => {
-                                            setDarkMode(!darkMode)
-                                        }}
-                                        icon={themeTokens.icon}
-                                    />
-                                    {children}
-                                </StyledLayout>
-                            </body>
-                        </html>
-                    </ThemeProvider>
-                </StyleSheetManager>
-            </StyledComponentsRegistry>
-        </QueryClientProvider>
+        <StyledComponentsRegistry>
+            <StyleSheetManager shouldForwardProp={() => true}>
+                <ThemeProvider theme={themeTokens.theme}>
+                    <>
+                        <GlobalStyle />
+                    </>
+                    <html lang="en">
+                        <body>
+                            <StyledLayout>
+                                <Header
+                                    switchTheme={() => {
+                                        setDarkMode(!darkMode)
+                                    }}
+                                    icon={themeTokens.icon}
+                                />
+                                {children}
+                            </StyledLayout>
+                        </body>
+                    </html>
+                </ThemeProvider>
+            </StyleSheetManager>
+        </StyledComponentsRegistry>
     )
 }
 

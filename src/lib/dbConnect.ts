@@ -1,5 +1,5 @@
 const mongoose = require('mongoose')
-import { logger } from '../helpers/logging'
+import { logger } from './logging'
 
 export const databaseConnect = async (): Promise<void> => {
     mongoose.Promise = global.Promise

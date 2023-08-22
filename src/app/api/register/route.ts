@@ -1,19 +1,13 @@
-import { databaseConnect } from '@/lib/db/connect'
-import { passwordHash } from '@/lib/helpers/auth'
-import { logger } from '@/lib/helpers/logging'
+import { passwordHash } from '@/lib/auth/password'
+import { databaseConnect } from '@/lib/dbConnect'
+import { logger } from '@/lib/logging'
 import { UserDTO } from '@/lib/models/user.model'
-import {
-    createUser,
-    getUser,
-    isValidUser,
-    toUserDVO,
-} from '@/lib/services/user.service'
-import type { NextApiResponse } from 'next'
+import { createUser, getUser, isValidUser } from '@/lib/services/user.service'
 import { NextResponse } from 'next/server'
 
 export const runtime = 'nodejs'
 
-export const POST = async function (req: Request, res: NextApiResponse) {
+export const POST = async function (req: Request, _res: Response) {
     // Does nothing if already connected
     await databaseConnect()
 
@@ -34,7 +28,7 @@ export const POST = async function (req: Request, res: NextApiResponse) {
         )
     }
 
-    const hashedPass = await passwordHash('sasdasdasd')
+    const hashedPass = await passwordHash(userCandidate.password)
     userCandidate.password = hashedPass
     try {
         const newUser = await createUser(userCandidate)
@@ -45,7 +39,7 @@ export const POST = async function (req: Request, res: NextApiResponse) {
             )
         }
 
-        return NextResponse.json(toUserDVO(newUser), { status: 201 })
+        return NextResponse.json({ status: 201 })
     } catch (e) {
         logger.error(e)
         return NextResponse.json(

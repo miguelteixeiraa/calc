@@ -6,7 +6,7 @@ import { useAtom } from 'jotai'
 import { calcHistoryAtom } from '@/lib/state/store'
 
 import { Button } from '@/components/Button'
-import { evaluateExpression } from '@/lib/helpers/calc'
+import { evaluateExpression } from '@/lib/calc'
 
 import styled from 'styled-components'
 

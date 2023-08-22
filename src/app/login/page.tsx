@@ -1,44 +1,49 @@
 'use client'
 
-import { useEffect } from 'react'
-import { Button } from '@/components/Button'
-import { loginRequest } from '@/lib/api/loginRequest'
-import { signUpRequest } from '@/lib/api/signUpRequest'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import styled from 'styled-components'
-import { redirect } from 'next/navigation'
+import { Button } from '@/components/Button'
+import { redirect, useRouter } from 'next/navigation'
 import { UserDTO } from '@/lib/models/user.model'
-import { userDataAtom } from '@/lib/state/store'
-import { useAtom } from 'jotai'
+import { useAuth } from '@/lib/hooks/useAuth'
+import { logger } from '@/lib/logging'
+import { useRegistration } from '@/lib/hooks/useRegistration'
 
 export default function Login() {
     const [formState, setFormState] = useState({} as Partial<UserDTO>)
-    const [userData, setUserData] = useAtom(userDataAtom)
-    const [signUpStatus, setSignUpStatus] = useState(false)
-    const [errorSignUp, setErrorSignUp] = useState('')
+    const [error, setError] = useState<string>('')
+    const [message, setMessage] = useState('')
+
+    const [authPayload, setAuthPayload] = useState<Partial<UserDTO>>({})
+    const [registrationPayload, setRegistrationPayload] = useState<
+        Partial<UserDTO>
+    >({})
+
+    const router = useRouter()
+    const { auth } = useAuth(authPayload)
+    const { registration } = useRegistration(registrationPayload)
+
+    const validateForm = () => {
+        if (!formState.email) {
+            setError('Your email address is missing.')
+            return
+        }
+        if (!formState.password) {
+            setError('Your password is missing.')
+        }
+    }
 
     useEffect(() => {
-        if (Object.keys(userData).length) {
+        if (auth.error.length) {
+            setError(auth.error)
+            return
+        }
+
+        if (Object.entries(auth.user).length) {
+            router.refresh()
             redirect('/profile')
         }
-    }, [userData])
-
-    const handleLogin = async () => {
-        const user = await loginRequest(formState)
-        if (!user) {
-            console.log('not found')
-        } else {
-            setUserData(user)
-        }
-    }
-    const handleSignUp = async () => {
-        try {
-            await signUpRequest(formState)
-            setSignUpStatus(true)
-        } catch (e) {
-            setErrorSignUp(e as string)
-        }
-    }
+    }, [auth, router])
 
     return (
         <StyledSignIn className={'signIn'}>
@@ -74,22 +79,27 @@ export default function Login() {
                 />
 
                 <Button
-                    onClick={handleLogin}
+                    onClick={() => {
+                        validateForm()
+                        setAuthPayload({ ...formState })
+                    }}
                     className="signIn__form--submit"
                     variant="secondary"
                 >
                     Sign in
                 </Button>
                 <Button
-                    onClick={!signUpStatus ? handleSignUp : () => {}}
+                    onClick={() => {
+                        validateForm()
+                        setRegistrationPayload({ ...formState })
+                    }}
                     className="signIn__form--submit"
                     variant="primary"
                 >
-                    {signUpStatus ? 'Success' : 'Sign up'}
+                    {!registration.error.length && registration.success === true
+                        ? 'Success'
+                        : 'Sign up'}
                 </Button>
-                {errorSignUp && (
-                    <span signIn__form--error-message>{errorSignUp}</span>
-                )}
             </span>
         </StyledSignIn>
     )

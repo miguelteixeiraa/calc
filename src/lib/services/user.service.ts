@@ -1,7 +1,7 @@
 import { historyModel } from '../models/history.model'
 import { nanoid } from 'nanoid'
 import { User, UserDVO, UserDTO, userModel } from '../models/user.model'
-import { logger } from '../helpers/logging'
+import { logger } from '../logging'
 
 const UserModel = userModel()
 const HistoryModel = historyModel()
@@ -39,7 +39,7 @@ export const isValidUser = (user: UserDTO): boolean => {
         historyId: 'dummy',
     }
     try {
-        new UserModel(newUserData)
+        new UserModel(newUserData).validate()
         return true
     } catch (_e) {
         return false
