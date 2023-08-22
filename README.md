@@ -11,7 +11,7 @@ pnpm i
 Then run the project using the development server with the following command:
 
 ```bash
-pnpm devs
+pnpm dev
 ```
 
 Using docker
