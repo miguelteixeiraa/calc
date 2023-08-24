@@ -12,8 +12,6 @@ import { lightTheme } from '@/themes/light'
 import { darkTheme } from '@/themes/dark'
 import { Header } from '@/components/Header'
 
-import { useAuth } from '@/lib/hooks/useAuth'
-
 export default function RootLayout({
     children,
 }: {
@@ -47,6 +45,7 @@ export default function RootLayout({
                                     }}
                                     icon={themeTokens.icon}
                                 />
+
                                 {children}
                             </StyledLayout>
                         </body>

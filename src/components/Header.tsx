@@ -1,9 +1,8 @@
 import styled from 'styled-components'
 
 import Link from 'next/link'
-import { useAuth } from '@/lib/hooks/useAuth'
-import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
+import { useAtom } from 'jotai'
+import { userDataAtom } from '@/lib/state/store'
 
 interface HeaderProps {
     switchTheme: () => void
@@ -11,12 +10,7 @@ interface HeaderProps {
 }
 
 export const Header = ({ switchTheme, icon }: HeaderProps) => {
-    const { auth } = useAuth()
-    const router = useRouter()
-
-    useEffect(() => {
-        console.log(auth)
-    }, [auth])
+    const [userData, _] = useAtom(userDataAtom)
 
     return (
         <StyledHeader>
@@ -26,11 +20,9 @@ export const Header = ({ switchTheme, icon }: HeaderProps) => {
             </span>
             <Link
                 className="header__auth"
-                href={`${
-                    Object.keys(auth.user).length ? '/profile' : '/login'
-                }`}
+                href={`${Object.keys(userData).length ? '/profile' : '/login'}`}
             >
-                {Object.keys(auth.user).length ? 'Profile' : 'Sign in'}
+                {Object.keys(userData).length ? 'Profile' : 'Sign in'}
             </Link>
         </StyledHeader>
     )

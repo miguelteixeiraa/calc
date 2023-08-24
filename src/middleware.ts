@@ -17,14 +17,22 @@ export async function middleware(request: NextRequest) {
         refreshAuthCookie(nextReq)
     }
 
+    if (request.nextUrl.pathname === '/authenticate') {
+        logger.info('USER' + JSON.stringify(loggedUser))
+    }
+
     if (request.nextUrl.pathname === '/profile' && !loggedUser) {
         request.nextUrl.pathname = '/login'
-        return NextResponse.redirect(request.nextUrl)
+        const response = NextResponse.redirect(request.nextUrl)
+        refreshAuthCookie(response)
+        return response
     }
 
     if (request.nextUrl.pathname === '/login' && loggedUser) {
         request.nextUrl.pathname = '/profile'
-        return NextResponse.redirect(request.nextUrl)
+        const response = NextResponse.redirect(request.nextUrl)
+        refreshAuthCookie(response)
+        return response
     }
 
     return nextReq

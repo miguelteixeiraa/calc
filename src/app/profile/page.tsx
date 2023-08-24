@@ -1,33 +1,38 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
 import { Button } from '@/components/Button'
-import { useAuth } from '@/lib/hooks/useAuth'
-import { logger } from '@/lib/logging'
-import { UserDVO } from '@/lib/models/user.model'
-import { GetServerSideProps, InferGetServerSidePropsType } from 'next'
-import { redirect } from 'next/navigation'
+import { useRouter } from 'next/navigation'
 import styled from 'styled-components'
+import { useAtom } from 'jotai'
+import { userDataAtom } from '@/lib/state/store'
+import { requestAuthentication } from '@/lib/requests/authentication.request'
+import { useEffect } from 'react'
 
 export default function Profile() {
+    const [userData, setUserData] = useAtom(userDataAtom)
     const router = useRouter()
-    const [isLoggedOut, setIsLoggedOut] = useState(false)
 
     useEffect(() => {
-        if (isLoggedOut) {
-            router.refresh()
-            redirect('/')
+        requestAuthentication({}).then(async (res) => {
+            if (!Object.keys(res.user).length) {
+                setUserData({})
+            }
+        })
+    }, [])
+
+    useEffect(() => {
+        if (!Object.keys(userData).length) {
+            router.push('/login')
         }
-    }, [isLoggedOut, router])
+    }, [userData])
 
     return (
         <StyledProfile className="profile">
-            <span className="profile__user">Hello</span>
+            <span className="profile__user">{}</span>
             <Button
                 onClick={async () => {
                     await fetch('/api/logout')
-                    setIsLoggedOut(true)
+                    setUserData({})
                 }}
                 className="profile__logout"
                 variant="danger"

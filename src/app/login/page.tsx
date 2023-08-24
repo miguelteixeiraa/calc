@@ -5,48 +5,94 @@ import styled from 'styled-components'
 import { Button } from '@/components/Button'
 import { redirect, useRouter } from 'next/navigation'
 import { UserDTO } from '@/lib/models/user.model'
-import { useAuth } from '@/lib/hooks/useAuth'
 import { logger } from '@/lib/logging'
-import { useRegistration } from '@/lib/hooks/useRegistration'
+import { MessageNotification } from '@/components/MessageNotification'
+import emailValidator from 'email-validator'
+import { useAtom } from 'jotai'
+import { userDataAtom } from '@/lib/state/store'
+import { requestAuthentication } from '@/lib/requests/authentication.request'
+import { requestRegistration } from '@/lib/requests/registration.request'
 
 export default function Login() {
     const [formState, setFormState] = useState({} as Partial<UserDTO>)
     const [error, setError] = useState<string>('')
     const [message, setMessage] = useState('')
-
-    const [authPayload, setAuthPayload] = useState<Partial<UserDTO>>({})
-    const [registrationPayload, setRegistrationPayload] = useState<
-        Partial<UserDTO>
-    >({})
-
+    const [_, setUserData] = useAtom(userDataAtom)
     const router = useRouter()
-    const { auth } = useAuth(authPayload)
-    const { registration } = useRegistration(registrationPayload)
 
-    const validateForm = () => {
-        if (!formState.email) {
-            setError('Your email address is missing.')
-            return
+    const [register, setRegister] = useState<{
+        data?: {
+            success?: boolean
+            error?: string
         }
-        if (!formState.password) {
+        loading?: boolean
+    }>({ data: {}, loading: false })
+
+    const isValidForm = (): boolean => {
+        if (
+            !formState.email?.length ||
+            !emailValidator.validate(formState.email)
+        ) {
+            setError('Your email address is missing or invalid.')
+            return false
+        }
+        if (!formState.password?.length) {
             setError('Your password is missing.')
+            return false
         }
+
+        return true
     }
 
-    useEffect(() => {
-        if (auth.error.length) {
+    const handleAuth = async () => {
+        const auth = await requestAuthentication({ ...formState })
+        if (auth.error?.length && !Object.keys(auth.user)) {
             setError(auth.error)
             return
         }
-
-        if (Object.entries(auth.user).length) {
-            router.refresh()
-            redirect('/profile')
+        if (Object.keys(auth.user).length) {
+            setUserData({ ...auth.user })
+            router.push('/profile')
         }
-    }, [auth, router])
+    }
+
+    const handleRegistration = async () => {
+        const registration = await requestRegistration(
+            (loading) => {
+                setRegister({
+                    ...register,
+                    loading,
+                })
+            },
+            { ...formState }
+        )
+
+        if (registration.error?.length && !registration.success) {
+            setError(registration.error)
+            return
+        } else if (registration.success) {
+            setRegister({ ...register, data: { ...registration } })
+            setMessage('User successfully created.')
+        }
+    }
+
+    const rewindNotifications = () => {
+        setError('')
+        setMessage('')
+    }
 
     return (
         <StyledSignIn className={'signIn'}>
+            {message && (
+                <MessageNotification variant="success">
+                    {message}
+                </MessageNotification>
+            )}
+            {error && (
+                <MessageNotification variant="error">
+                    {error}
+                </MessageNotification>
+            )}
             <span className="signIn__title">Sign in / Sign up</span>
             <span className="signIn__form">
                 <input
@@ -79,26 +125,30 @@ export default function Login() {
                 />
 
                 <Button
+                    variant="secondary"
                     onClick={() => {
-                        validateForm()
-                        setAuthPayload({ ...formState })
+                        if (isValidForm()) {
+                            rewindNotifications()
+                            handleAuth()
+                        }
                     }}
                     className="signIn__form--submit"
-                    variant="secondary"
                 >
                     Sign in
                 </Button>
                 <Button
+                    variant="primary"
+                    isLoading={register.loading}
+                    disabled={register.data?.success}
                     onClick={() => {
-                        validateForm()
-                        setRegistrationPayload({ ...formState })
+                        if (isValidForm()) {
+                            rewindNotifications()
+                            handleRegistration()
+                        }
                     }}
                     className="signIn__form--submit"
-                    variant="primary"
                 >
-                    {!registration.error.length && registration.success === true
-                        ? 'Success'
-                        : 'Sign up'}
+                    Sign up
                 </Button>
             </span>
         </StyledSignIn>
@@ -120,7 +170,6 @@ const StyledSignIn = styled.main`
             margin-top: 2.2rem;
             margin-bottom: 0.2rem;
             font-size: 0.8rem;
-
             color: ${({ theme }) => theme.font.colors.primary};
         }
 

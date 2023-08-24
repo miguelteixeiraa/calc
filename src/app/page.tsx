@@ -12,7 +12,6 @@ import styled from 'styled-components'
 
 export default function Calc() {
     const [display, setDisplay] = useState('')
-    const [displayHistory, setDisplayHistory] = useAtom(calcHistoryAtom)
 
     const handleDisplayChange = (exp: string) => {
         setDisplay(exp)

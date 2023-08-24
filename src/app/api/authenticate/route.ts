@@ -3,12 +3,17 @@ import { UserDTO } from '@/lib/models/user.model'
 import * as userService from '@/lib/services/user.service'
 import { NextRequest, NextResponse } from 'next/server'
 import { generateJwt } from '@/lib/auth/jwt'
-import { setCookie } from '@/lib/auth/cookies'
+import { getUserFromCookies, setCookie } from '@/lib/auth/cookies'
 import { passwordMatch } from '@/lib/auth/password'
 
 export const runtime = 'nodejs'
 
 export const POST = async function authenticate(req: NextRequest) {
+    const userFromCookies = await getUserFromCookies(req)
+    if (userFromCookies) {
+        return NextResponse.json(userFromCookies, { status: 200 })
+    }
+
     // Does nothing if already connected
     await databaseConnect()
 
